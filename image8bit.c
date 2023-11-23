@@ -393,8 +393,10 @@ void ImageSetPixel(Image img, int x, int y, uint8 level) { ///
 /// resulting in a "photographic negative" effect.
 void ImageNegative(Image img) { ///
   assert (img != NULL);
-  
-  // Insert your code here!
+  for (int i = 0; i < img->width*img->height; i++) {
+    img->pixel[i] = img->maxval - img->pixel[i];
+  }
+  // Insert your code here! ok
 }
 
 /// Apply threshold to image.
