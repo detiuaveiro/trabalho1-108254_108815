@@ -319,7 +319,17 @@ void ImageStats(Image img, uint8* min, uint8* max) { ///
   assert (max != NULL);
   //TODO *min
   *max=img->maxval;
-  // Insert your code here!
+  *min= img->pixel[0];
+  for(int i =0; i< img->width* img->height; i++){
+    int pixel_value= img->pixel[i];
+    if (pixel_value<*min){
+      *min=pixel_value;
+    }
+    if(pixel_value> *max){
+      *max=pixel_value;
+    }
+  }
+  // Insert your code here! ok?
 }
 
 /// Check if pixel position (x,y) is inside img.
@@ -393,18 +403,17 @@ void ImageNegative(Image img) { ///
 void ImageThreshold(Image img, uint8 thr) { ///
   assert (img != NULL);
   assert (0 <= thr && thr <= img->maxval);
-  if (pixel<thr) {
+  
+  for(int i=0; i<img->width* img->height;i++){
+    if (img->pixel[i]<thr) {
     ImageNegative(img);
   } 
-  else if (pixel>=thr){
-    for (int i = 0; i < img->width*img->height; i++) {
-      img->pixel[i] = img->maxval;
+    else{
+      img->pixel[i]= img->maxval;
     }
-    
   }
-  // Insert your code here!
+  // Insert your code here! ok?
 }
-
 /// Brighten image by a factor.
 /// Multiply each pixel level by a factor, but saturate at maxval.
 /// This will brighten the image if factor>1.0 and
@@ -414,16 +423,16 @@ void ImageBrighten(Image img, double factor) { ///
   assert (factor >= 0.0);
   if (factor>1.0) {
     for (int i = 0; i < img->width*img->height; i++) {
-      img->pixel[i] = pixel[i]*factor;
+      img->pixel[i] = img->pixel[i]*factor;
     }
   }
   else if (factor<1.0) {
     for (int i = 0; i < img->width*img->height; i++) {
-      img->pixel[i] = pixel[i]*factor;
+      img->pixel[i] = img->pixel[i]*factor;
     }
   }
   // ? assert (factor >= 0.0);
-  // Insert your code here!
+  // Insert your code here! ok
 }
 
 
@@ -450,10 +459,19 @@ void ImageBrighten(Image img, double factor) { ///
 /// On failure, returns NULL and errno/errCause are set accordingly.
 Image ImageRotate(Image img) { ///
   assert (img != NULL);
-  for (int i = 0; i < img->width*img->height; i++) {
-    img->pixel[i] = ;
-  }  
-  // Insert your code here!
+  Image rotated_img= ImageCreate(img->height,img->width, img->maxval);
+  
+  //troca--se as colunas com as linhas
+  
+  for(int y=0; y< img->height; y++){
+    
+    for(int x=0; x< img->width; x++){
+      
+      uint8 pixel_value= ImageGetPixel(img, x, y);
+      ImageSetPixel(rotated_img, y, x, pixel_value);
+    }
+  } 
+  // Insert your code here! ok
 }
 
 /// Mirror an image = flip left-right.
