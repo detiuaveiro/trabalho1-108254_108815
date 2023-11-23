@@ -484,9 +484,9 @@ Image ImageRotate(Image img) { ///
 Image ImageMirror(Image img) { ///
   assert (img != NULL);
   for (int i = 0; i < img->width*img->height; i++) {
-    img->pixel[i] = ;
+      img->pixel[i] = img->pixel[img->width - 1 - i];
   }
-  // Insert your code here!
+  // Insert your code here! ok
 }
 
 /// Crop a rectangular subimage from img.
@@ -504,7 +504,17 @@ Image ImageMirror(Image img) { ///
 Image ImageCrop(Image img, int x, int y, int w, int h) { ///
   assert (img != NULL);
   assert (ImageValidRect(img, x, y, w, h));
-  // Insert your code here!
+  
+  Image new_image = ImageCreate(w,h,img->maxval);
+  for (int i = 0; i < img->width*img->height; i++) {
+      for (int j = 0; j < new_image->width*new_image->height; j++) {
+        int old_index = (y + j) * img->width + (x + i);
+            int new_index = j * w + i;
+            new_image->pixel[new_index] = img->pixel[old_index];
+        }
+  }
+  return new_image;
+  // Insert your code here! ?
 }
 
 
@@ -518,7 +528,15 @@ void ImagePaste(Image img1, int x, int y, Image img2) { ///
   assert (img1 != NULL);
   assert (img2 != NULL);
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
-  // Insert your code here!
+
+  for (int j=0; j< img2->height; j++){
+
+    for(int i=0; i< img2->width; i++){
+      uint8 pixel_value= ImageGetPixel(img2, i, j);
+      ImageSetPixel(img1, x + i, y + j, pixel_value);
+    }
+  }
+  // Insert your code here! ok
 }
 
 /// Blend an image into a larger image.
@@ -531,7 +549,16 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
   assert (img1 != NULL);
   assert (img2 != NULL);
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
-  // Insert your code here!
+  
+   for (int j = 0; j < img2->height; j++) {
+        for (int i = 0; i < img2->width; i++) {
+            int img1_index = (y + j) * img1->width + (x + i);
+            int img2_index = j * img2->width + i;
+            img1->pixel[img1_index] = img1->pixel[img1_index] * alpha + img2->pixel[img2_index] * (1 - alpha);
+        }
+  }
+  
+  // Insert your code here! ok
 }
 
 /// Compare an image to a subimage of a larger image.
@@ -541,7 +568,20 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2) { ///
   assert (img1 != NULL);
   assert (img2 != NULL);
   assert (ImageValidPos(img1, x, y));
-  // Insert your code here!
+  assert (ImageValidRect(img1, x, y, img2->width, img2->height));
+  
+  for (int j = 0; j < img2->height; j++) {
+        for (int i = 0; i < img2->width; i++) {
+            int img1_index = (y + j) * img1->width + (x + i);
+            int img2_index = j * img2->width + i;
+            if (img1->pixel[img1_index] != img2->pixel[img2_index]) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+
+  // Insert your code here! ok 
 }
 
 /// Locate a subimage inside another image.
@@ -551,7 +591,19 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2) { ///
 int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
   assert (img1 != NULL);
   assert (img2 != NULL);
-  // Insert your code here!
+   
+   for (int j = 0; j <= img1->height - img2->height; j++) {
+        for (int i = 0; i <= img1->width - img2->width; i++) {
+            if (ImageMatchSubImage(img1, i, j, img2)) {
+                *px = i;
+                *py = j;
+                return 1;
+            }
+        }
+    }
+    return 0;
+
+  // Insert your code here! ok
 }
 
 
@@ -562,6 +614,28 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 /// [x-dx, x+dx]x[y-dy, y+dy].
 /// The image is changed in-place.
 void ImageBlur(Image img, int dx, int dy) { ///
-  // Insert your code here!
-}
+  assert(img != NULL);
+  for(int y=0; y < img->height; y++){
 
+    for(int x=0; x < img->width; x++){
+      
+      double mean= 0.0;
+      double count= 0;
+
+      for (int j= -dy; j< img->height; j++ ){
+        for(int i= -dx; i< img->width; i++){
+           if (ImageValidPos(img, x + i, y + j)) {
+            mean += ImageGetPixel(img, x + i, y + j);
+            count++;
+          }
+        }
+      }
+
+      if (count > 0) {
+        mean /= count;
+        ImageSetPixel(img, x, y, (uint8)mean);
+      }
+    }
+  }
+}
+  
