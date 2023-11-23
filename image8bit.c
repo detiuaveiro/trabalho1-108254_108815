@@ -171,7 +171,32 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
   assert (width >= 0);
   assert (height >= 0);
   assert (0 < maxval && maxval <= PixMax);
-  // Insert your code here!
+
+  Image img = (Image)malloc(sizeof(struct image));
+  // Check for allocation failure
+  if (img == NULL) {
+    errCause = "Out of memory";
+    return NULL;
+  }
+  // Initialize image fields
+  img->width = width;
+  img->height = height;
+  img->maxval = maxval;
+  // Allocate pixel array
+  img->pixel = (uint8*)malloc(width*height*sizeof(uint8));
+  // Check for allocation failure
+  if (img->pixel == NULL) {
+    errCause = "Out of memory";
+    free(img);
+    return NULL;
+  }
+  // Clear pixel array (set all pixels to black)
+  for (int i = 0; i < width*height; i++) {
+    img->pixel[i] = 0;
+  }
+  // Return new image
+  return img;
+  // Insert your code here! ok
 }
 
 /// Destroy the image pointed to by (*imgp).
@@ -179,9 +204,20 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
 /// If (*imgp)==NULL, no operation is performed.
 /// Ensures: (*imgp)==NULL.
 /// Should never fail, and should preserve global errno/errCause.
-void ImageDestroy(Image* imgp) { ///
+void ImageDestroy(Image* imgp){ ///
   assert (imgp != NULL);
-  // Insert your code here!
+  // Free pixel array
+  free((*imgp)->pixel);
+
+  // Free image structure
+  free(*imgp);
+
+  // Set image pointer to NULL (just in case)
+  *imgp = NULL;
+
+  // Return success
+  return;
+  // Insert your code here! ok
 }
 
 
@@ -214,21 +250,7 @@ Image ImageLoad(const char* filename) { ///
   FILE* f = NULL;
   Image img = NULL;
 
-  int success = 
-  check( (f = fopen(filename, "rb")) != NULL, "Open failed" ) &&
-  // Parse PGM header
-  check( fscanf(f, "P%c ", &c) == 1 && c == '5' , "Invalid file format" ) &&
-  skipComments(f) >= 0 &&
-  check( fscanf(f, "%d ", &w) == 1 && w >= 0 , "Invalid width" ) &&
-  skipComments(f) >= 0 &&
-  check( fscanf(f, "%d ", &h) == 1 && h >= 0 , "Invalid height" ) &&
-  skipComments(f) >= 0 &&
-  check( fscanf(f, "%d", &maxval) == 1 && 0 < maxval && maxval <= (int)PixMax , "Invalid maxval" ) &&
-  check( fscanf(f, "%c", &c) == 1 && isspace(c) , "Whitespace expected" ) &&
-  // Allocate image
-  (img = ImageCreate(w, h, (uint8)maxval)) != NULL &&
-  // Read pixels
-  check( fread(img->pixel, sizeof(uint8), w*h, f) == w*h , "Reading pixels" );
+  int success = check( (f = fopen(filename, "rb")) != NULL, "Open failed" ) && check( fscanf(f, "P%c ", &c) == 1 && c == '5' , "Invalid file format" ) && skipComments(f) >= 0 && check( fscanf(f, "%d ", &w) == 1 && w >= 0 , "Invalid width" ) && skipComments(f) >= 0 && check( fscanf(f, "%d ", &h) == 1 && h >= 0 , "Invalid height" ) && skipComments(f) >= 0 && check( fscanf(f, "%d", &maxval) == 1 && 0 < maxval && maxval <= (int)PixMax , "Invalid maxval" ) && check( fscanf(f, "%c", &c) == 1 && isspace(c) , "Whitespace expected" ) && (img = ImageCreate(w, h, (uint8)maxval)) != NULL && check( fread(img->pixel, sizeof(uint8), w*h, f) == w*h , "Reading pixels" );
   PIXMEM += (unsigned long)(w*h);  // count pixel memory accesses
 
   // Cleanup
@@ -293,6 +315,10 @@ int ImageMaxval(Image img) { ///
 /// *max is set to the maximum.
 void ImageStats(Image img, uint8* min, uint8* max) { ///
   assert (img != NULL);
+  assert (min != NULL);
+  assert (max != NULL);
+  //TODO *min
+  *max=img->maxval;
   // Insert your code here!
 }
 
@@ -305,7 +331,8 @@ int ImageValidPos(Image img, int x, int y) { ///
 /// Check if rectangular area (x,y,w,h) is completely inside img.
 int ImageValidRect(Image img, int x, int y, int w, int h) { ///
   assert (img != NULL);
-  // Insert your code here!
+  return (0 <= x && x+w <= img->width) && (0 <= y && y+h <= img->height);
+  // Insert your code here! ok
 }
 
 /// Pixel get & set operations
@@ -321,6 +348,7 @@ int ImageValidRect(Image img, int x, int y, int w, int h) { ///
 static inline int G(Image img, int x, int y) {
   int index;
   // Insert your code here!
+  index = y*img->width + x;
   assert (0 <= index && index < img->width*img->height);
   return index;
 }
@@ -355,6 +383,7 @@ void ImageSetPixel(Image img, int x, int y, uint8 level) { ///
 /// resulting in a "photographic negative" effect.
 void ImageNegative(Image img) { ///
   assert (img != NULL);
+  
   // Insert your code here!
 }
 
@@ -363,6 +392,16 @@ void ImageNegative(Image img) { ///
 /// all pixels with level>=thr to white (maxval).
 void ImageThreshold(Image img, uint8 thr) { ///
   assert (img != NULL);
+  assert (0 <= thr && thr <= img->maxval);
+  if (pixel<thr) {
+    ImageNegative(img);
+  } 
+  else if (pixel>=thr){
+    for (int i = 0; i < img->width*img->height; i++) {
+      img->pixel[i] = img->maxval;
+    }
+    
+  }
   // Insert your code here!
 }
 
@@ -372,6 +411,17 @@ void ImageThreshold(Image img, uint8 thr) { ///
 /// darken the image if factor<1.0.
 void ImageBrighten(Image img, double factor) { ///
   assert (img != NULL);
+  assert (factor >= 0.0);
+  if (factor>1.0) {
+    for (int i = 0; i < img->width*img->height; i++) {
+      img->pixel[i] = pixel[i]*factor;
+    }
+  }
+  else if (factor<1.0) {
+    for (int i = 0; i < img->width*img->height; i++) {
+      img->pixel[i] = pixel[i]*factor;
+    }
+  }
   // ? assert (factor >= 0.0);
   // Insert your code here!
 }
@@ -400,6 +450,9 @@ void ImageBrighten(Image img, double factor) { ///
 /// On failure, returns NULL and errno/errCause are set accordingly.
 Image ImageRotate(Image img) { ///
   assert (img != NULL);
+  for (int i = 0; i < img->width*img->height; i++) {
+    img->pixel[i] = ;
+  }  
   // Insert your code here!
 }
 
@@ -412,6 +465,9 @@ Image ImageRotate(Image img) { ///
 /// On failure, returns NULL and errno/errCause are set accordingly.
 Image ImageMirror(Image img) { ///
   assert (img != NULL);
+  for (int i = 0; i < img->width*img->height; i++) {
+    img->pixel[i] = ;
+  }
   // Insert your code here!
 }
 
