@@ -408,7 +408,7 @@ void ImageThreshold(Image img, uint8 thr) { ///
   
   for(int i=0; i<img->width* img->height;i++){
     if (img->pixel[i]<thr) {
-    ImageNegative(img);
+    img->pixel[i]= 0; // ou ImageNegative(img);?
   } 
     else{
       img->pixel[i]= img->maxval;
