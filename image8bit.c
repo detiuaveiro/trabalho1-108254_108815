@@ -576,7 +576,7 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
                   blended_value = img1->maxval;
               }
               
-              img1->pixel[img1_index] = (uint8)blended_value;
+              img1->pixel[img1_index] = (uint8)(blended_value+0.5);
             }
         }
   }
@@ -656,7 +656,7 @@ void ImageBlur(Image img, int dx, int dy) { ///
 
       if (count > 0) {
         mean /= count;
-        ImageSetPixel(img, x, y, (uint8)mean);
+        ImageSetPixel(img, x, y, (uint8)(mean+0.5));
       }
     }
   }
