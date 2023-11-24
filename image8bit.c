@@ -644,8 +644,8 @@ void ImageBlur(Image img, int dx, int dy) { ///
       double mean= 0.0;
       double count= 0;
 
-      for (int j= -dy; j< 2 * dy + 1; j++ ){
-        for(int i= -dx; i< 2 * dx + 1; i++){
+      for (int j= -dy; j< dy; j++ ){
+        for(int i= -dx; i< dx; i++){
            if (ImageValidPos(img, x + i, y + j)) {
             mean += ImageGetPixel(img, x + i, y + j);
             count++;
