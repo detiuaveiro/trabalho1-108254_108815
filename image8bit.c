@@ -423,12 +423,15 @@ void ImageThreshold(Image img, uint8 thr) { ///
 void ImageBrighten(Image img, double factor) { ///
   assert (img != NULL);
   assert (factor >= 0.0);
+
   if (factor>1.0) {
+    factor=1.0;
     for (int i = 0; i < img->width*img->height; i++) {
       img->pixel[i] = img->pixel[i]*factor;
     }
   }
   else if (factor<1.0) {
+    factor=0.1;  //exemplo
     for (int i = 0; i < img->width*img->height; i++) {
       img->pixel[i] = img->pixel[i]*factor;
     }
@@ -472,7 +475,8 @@ Image ImageRotate(Image img) { ///
       uint8 pixel_value= ImageGetPixel(img, x, y);
       ImageSetPixel(rotated_img, y, x, pixel_value);
     }
-  } 
+  }
+  return rotated_img; 
   // Insert your code here! ok
 }
 
