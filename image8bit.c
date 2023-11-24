@@ -424,8 +424,14 @@ void ImageBrighten(Image img, double factor) { ///
   assert (img != NULL);
   assert (factor >= 0.0);
 
-  for (int i = 0; i < img->width * img->height; i++) {
-        img->pixel[i] = (uint8)fmin(img->maxval, img->pixel[i] * factor);
+   for (int i = 0; i < img->width * img->height; i++) {
+        double newPixelValue = img->pixel[i] * factor;
+
+        if (newPixelValue > img->maxval) {
+            img->pixel[i] = img->maxval;
+        } else {
+            img->pixel[i] = (uint8)newPixelValue;
+        }
     }
   // ? assert (factor >= 0.0);
   // Insert your code here! ok
