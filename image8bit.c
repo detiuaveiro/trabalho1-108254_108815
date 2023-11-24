@@ -639,7 +639,7 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 void ImageBlur(Image img, int dx, int dy) {
   assert(img != NULL);
 
-  Image temp = ImageCreate(img->width, img->height);
+  Image temp = ImageCreate(img->width, img->height, img->maxval);
   
   for(int y=0; y < img->height; y++){
     for(int x=0; x < img->width; x++){
@@ -662,8 +662,12 @@ void ImageBlur(Image img, int dx, int dy) {
     }
   }  
 
-  memcpy(img->pixel, temp->pixel, img->width * img->height * sizeof(uint8));
-
-  ImageDestroy(temp);
+  for(int y=0; y < img->height; y++){
+    for(int x=0; x < img->width; x++){
+      ImageSetPixel(img, x, y, ImageGetPixel(temp, x, y));
+    }
+  }
+  
+  ImageDestroy(&temp);
 }
   
