@@ -570,8 +570,12 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
 
             double blended_value = pixel1 * alpha + pixel2 * (1.0 - alpha);
 
-            blended_value = fmin(fmax(blended_value, 0.0), img1->maxval);
-
+            if (blended_value < 0.0) {
+                blended_value = 0.0;
+            } else if (blended_value > img1->maxval) {
+                blended_value = img1->maxval;
+            }
+            
             img1->pixel[img1_index] = (uint8)blended_value;
         }
   }
