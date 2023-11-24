@@ -10,13 +10,13 @@
 /// 2013, 2023
 
 // Student authors (fill in below):
-// NMec:  Name:
+// NMec:108815  Name:Francisco Murcela
+// NMec:108254  Name:Gonçalo Lima
 // 
 // 
 // 
 // Date:
 //
-
 #include "image8bit.h"
 
 #include <assert.h>
@@ -424,14 +424,12 @@ void ImageBrighten(Image img, double factor) { ///
   assert (img != NULL);
   assert (factor >= 0.0);
 
-  if (factor>1.0) {
-    factor=1.0;
+  if (factor>=1.0) {
     for (int i = 0; i < img->width*img->height; i++) {
       img->pixel[i] = img->pixel[i]*factor;
     }
   }
   else if (factor<1.0) {
-    factor=0.1;  //exemplo
     for (int i = 0; i < img->width*img->height; i++) {
       img->pixel[i] = img->pixel[i]*factor;
     }
@@ -473,7 +471,7 @@ Image ImageRotate(Image img) { ///
     for(int x=0; x< img->width; x++){
       
       uint8 pixel_value= ImageGetPixel(img, x, y);
-      ImageSetPixel(rotated_img, y, x, pixel_value);
+      ImageSetPixel(rotated_img, y, img->width - x - 1, pixel_value);
     }
   }
   return rotated_img; 
@@ -489,10 +487,14 @@ Image ImageRotate(Image img) { ///
 /// On failure, returns NULL and errno/errCause are set accordingly.
 Image ImageMirror(Image img) { ///
   assert (img != NULL);
-  for (int i = 0; i < img->width*img->height; i++) {
-      img->pixel[i] = img->pixel[img->width - 1 - i];
+  Image mirror_image = ImageCreate(img->width, img->height, img->maxval);
+  for (int y = 0; y < img->height; y++) {
+    for (int x = 0; x < img->width; x++) {
+      uint8 pixel_value = ImageGetPixel(img, x, y);
+      ImageSetPixel(mirror_image, img->width - 1 - x, y, pixel_value);
+    }
   }
-  // Insert your code here! ok
+  return mirror_image;
 }
 
 /// Crop a rectangular subimage from img.
