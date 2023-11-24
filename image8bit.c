@@ -636,12 +636,13 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 /// Each pixel is substituted by the mean of the pixels in the rectangle
 /// [x-dx, x+dx]x[y-dy, y+dy].
 /// The image is changed in-place.
-void ImageBlur(Image img, int dx, int dy) { ///
+void ImageBlur(Image img, int dx, int dy) {
   assert(img != NULL);
-  for(int y=0; y < img->height; y++){
 
+  Image temp = ImageCreate(img->width, img->height);
+  
+  for(int y=0; y < img->height; y++){
     for(int x=0; x < img->width; x++){
-      
       double mean= 0.0;
       double count= 0;
 
@@ -656,9 +657,13 @@ void ImageBlur(Image img, int dx, int dy) { ///
 
       if (count > 0) {
         mean /= count;
-        ImageSetPixel(img, x, y, (uint8)(mean+0.5));
+        ImageSetPixel(temp, x, y, (uint8)(mean+0.5));
       }
     }
-  }
+  }  
+
+  memcpy(img->pixel, temp->pixel, img->width * img->height * sizeof(uint8));
+
+  ImageDestroy(temp);
 }
   
