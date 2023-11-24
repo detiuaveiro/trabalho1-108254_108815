@@ -514,8 +514,9 @@ Image ImageCrop(Image img, int x, int y, int w, int h) { ///
   assert (ImageValidRect(img, x, y, w, h));
   
   Image new_image = ImageCreate(w,h,img->maxval);
-  for (int i = 0; i < img->width*img->height; i++) {
-      for (int j = 0; j < new_image->width*new_image->height; j++) {
+
+  for (int j = 0; j < h; j++) {
+      for (int i = 0; i < w; i++) {
         int old_index = (y + j) * img->width + (x + i);
             int new_index = j * w + i;
             new_image->pixel[new_index] = img->pixel[old_index];
@@ -560,9 +561,14 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
   
    for (int j = 0; j < img2->height; j++) {
         for (int i = 0; i < img2->width; i++) {
+            
             int img1_index = (y + j) * img1->width + (x + i);
             int img2_index = j * img2->width + i;
-            img1->pixel[img1_index] = img1->pixel[img1_index] * alpha + img2->pixel[img2_index] * (1 - alpha);
+
+            double pixel1 = (double)img1->pixel[img1_index];
+            double pixel2 = (double)img2->pixel[img2_index];
+            
+            img1->pixel[img1_index] = (uint8)(pixel1 * alpha + pixel2* (1 - alpha)); 
         }
   }
   
