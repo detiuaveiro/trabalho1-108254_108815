@@ -424,16 +424,9 @@ void ImageBrighten(Image img, double factor) { ///
   assert (img != NULL);
   assert (factor >= 0.0);
 
-  if (factor>=1.0) {
-    for (int i = 0; i < img->width*img->height; i++) {
-      img->pixel[i] = img->pixel[i]*factor;
+  for (int i = 0; i < img->width * img->height; i++) {
+        img->pixel[i] = (uint8)fmin(img->maxval, img->pixel[i] * factor);
     }
-  }
-  else if (factor<1.0) {
-    for (int i = 0; i < img->width*img->height; i++) {
-      img->pixel[i] = img->pixel[i]*factor;
-    }
-  }
   // ? assert (factor >= 0.0);
   // Insert your code here! ok
 }
@@ -565,18 +558,19 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
             int img1_index = (y + j) * img1->width + (x + i);
             int img2_index = j * img2->width + i;
 
-            double pixel1 = (double)img1->pixel[img1_index];
-            double pixel2 = (double)img2->pixel[img2_index];
-
-            double blended_value = pixel1 * alpha + pixel2 * (1.0 - alpha);
-
-            if (blended_value < 0.0) {
-                blended_value = 0.0;
-            } else if (blended_value > img1->maxval) {
-                blended_value = img1->maxval;
-            }
+            if (ImageValidPos(img1, x+ i, y+ j)){
+              double pixel1 = (double)img1->pixel[img1_index];
+              double pixel2 = (double)img2->pixel[img2_index];
+              double blended_value = pixel1 * alpha + pixel2 * (1.0 - alpha);
             
-            img1->pixel[img1_index] = (uint8)blended_value;
+              if (blended_value < 0.0) {
+                  blended_value = 0.0;
+              } else if (blended_value > img1->maxval) {
+                  blended_value = img1->maxval;
+              }
+              
+              img1->pixel[img1_index] = (uint8)blended_value;
+            }
         }
   }
   
@@ -644,8 +638,8 @@ void ImageBlur(Image img, int dx, int dy) { ///
       double mean= 0.0;
       double count= 0;
 
-      for (int j= -dy; j< img->height; j++ ){
-        for(int i= -dx; i< img->width; i++){
+      for (int j= -dy; j< 2 * dy + 1; j++ ){
+        for(int i= -dx; i< 2 * dx + 1; i++){
            if (ImageValidPos(img, x + i, y + j)) {
             mean += ImageGetPixel(img, x + i, y + j);
             count++;
