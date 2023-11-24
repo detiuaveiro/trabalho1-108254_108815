@@ -430,7 +430,7 @@ void ImageBrighten(Image img, double factor) { ///
         if (newPixelValue > img->maxval) {
             img->pixel[i] = img->maxval;
         } else {
-            img->pixel[i] = (uint8)newPixelValue;
+            img->pixel[i] = (uint8)(newPixelValue+0.5);
         }
     }
   // ? assert (factor >= 0.0);
@@ -558,6 +558,7 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
   assert (img2 != NULL);
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
   
+  
    for (int j = 0; j < img2->height; j++) {
         for (int i = 0; i < img2->width; i++) {
             
@@ -567,7 +568,7 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
             if (ImageValidPos(img1, x+ i, y+ j)){
               double pixel1 = (double)img1->pixel[img1_index];
               double pixel2 = (double)img2->pixel[img2_index];
-              double blended_value = pixel1 * alpha + pixel2 * (1.0 - alpha);
+              double blended_value = pixel1 * (1.0 - alpha) + pixel2 * (alpha);
             
               if (blended_value < 0.0) {
                   blended_value = 0.0;
@@ -644,8 +645,8 @@ void ImageBlur(Image img, int dx, int dy) { ///
       double mean= 0.0;
       double count= 0;
 
-      for (int j= -dy; j< dy; j++ ){
-        for(int i= -dx; i< dx; i++){
+      for (int j= -dy; j<=dy; j++ ){
+        for(int i= -dx; i<=dx; i++){
            if (ImageValidPos(img, x + i, y + j)) {
             mean += ImageGetPixel(img, x + i, y + j);
             count++;
