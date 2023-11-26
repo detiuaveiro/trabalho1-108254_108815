@@ -192,7 +192,7 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
     return NULL;
   }
   
-  for (int i = 0; i < width*height; i++) { // percorre todos os pixeis da imagem
+  for (int i = 0; i < width*height; i++) { //O(Z) percorre todos os pixeis da imagem
     img->pixel[i] = 0;
   }
   // inicializa os pixeis a 0 (deixa todos os pixeis a preto)
@@ -584,11 +584,11 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2) { ///
   assert (img2 != NULL);
   assert (ImageValidPos(img1, x, y));
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
-  // verifica se a posição é válida
+  // verifica se a posição é válida 
   // verifica se a imagem cabe dentro da imagem original
 
-  for (int j = 0; j < img2->height; j++) {
-        for (int i = 0; i < img2->width; i++) {// itera sobre a nova imagem
+  for (int j = 0; j < img2->height; j++) { //O(P)
+        for (int i = 0; i < img2->width; i++) {//O(L) itera sobre a nova imagem
             int img1_index = (y + j) * img1->width + (x + i); // calcula o index do pixel na imagem original
             int img2_index = j * img2->width + i; // calcula o index do pixel na nova imagem
             if (img1->pixel[img1_index] != img2->pixel[img2_index]) {
@@ -596,7 +596,7 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2) { ///
             }
         }
     }
-    return 1; // se os pixeis forem iguais, retorna 1
+    return 1; // se os pixeis forem iguais, retorna 1-- O(P*L)->complexidade
 }
 
 /// Locate a subimage inside another image.
@@ -607,9 +607,9 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) {
   assert (img1 != NULL);
   assert (img2 != NULL);
    
-   for (int j = 0; j <= img1->height - img2->height; j++) {
-        for (int i = 0; i <= img1->width - img2->width; i++) { // itera sobre a nova imagem
-            if (ImageMatchSubImage(img1, i, j, img2)) {
+   for (int j = 0; j <= img1->height - img2->height; j++) { //O(N)
+        for (int i = 0; i <= img1->width - img2->width; i++) { //O(M) itera sobre a nova imagem
+            if (ImageMatchSubImage(img1, i, j, img2)) { //O(P*L), if faz comparação
                 *px = i;  
                 *py = j;
                 return 1;
@@ -617,7 +617,7 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) {
             }
         }
     }
-    return 0; // se a imagem não for encontrada, retorna 0
+    return 0; // se a imagem não for encontrada, retorna 0-- O(N)*O(M)*O(P*L)= O(N*M*P*L)-> complexidade de ordem 1.
 }
 
 
@@ -630,17 +630,17 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) {
 void ImageBlur(Image img, int dx, int dy) {
   assert(img != NULL);
 
-  Image temp = ImageCreate(img->width, img->height, img->maxval);
+  Image temp = ImageCreate(img->width, img->height, img->maxval);//O(Z)
   // cria uma imagem temporaria
-  for(int y=0; y < img->height; y++){
-    for(int x=0; x < img->width; x++){ // itera sobre a imagem original
+  for(int y=0; y < img->height; y++){//O(M)
+    for(int x=0; x < img->width; x++){ //O(N) itera sobre a imagem original
       double mean= 0.0; // inicializa a variável mean
       double count= 0; // e a count
 
-      for (int j= -dy; j<=dy; j++ ){
-        for(int i= -dx; i<=dx; i++){ // itera sobre a imagem temporaria
-           if (ImageValidPos(img, x + i, y + j)) {
-            mean += ImageGetPixel(img, x + i, y + j); // se a posição for válida, soma o valor do pixel à variável mean
+      for (int j= -dy; j<=dy; j++ ){//O(P)
+        for(int i= -dx; i<=dx; i++){ //O(L) (itera sobre a imagem temporaria
+           if (ImageValidPos(img, x + i, y + j)) {//O(1)
+            mean += ImageGetPixel(img, x + i, y + j); //O(1) se a posição for válida, soma o valor do pixel à variável mean
             count++; // e incrementa a variável count
           }
         }
@@ -648,17 +648,17 @@ void ImageBlur(Image img, int dx, int dy) {
 
       if (count > 0) { // se count for maior que 0, calcula a média
         mean /= count; 
-        ImageSetPixel(temp, x, y, (uint8)(mean+0.5)); // +0.5 para evitar erros de arredondamento do uint8
+        ImageSetPixel(temp, x, y, (uint8)(mean+0.5)); //O(1) +0.5 para evitar erros de arredondamento do uint8
       }
     }
   }  
 
-  for(int y=0; y < img->height; y++){
-    for(int x=0; x < img->width; x++){ // itera sobre a imagem original
-      ImageSetPixel(img, x, y, ImageGetPixel(temp, x, y)); // copia o pixel da imagem temporaria para a imagem original
+  for(int y=0; y < img->height; y++){//O(M)
+    for(int x=0; x < img->width; x++){ //O(N) itera sobre a imagem original
+      ImageSetPixel(img, x, y, ImageGetPixel(temp, x, y)); // O(1)copia o pixel da imagem temporaria para a imagem original
     }
   }
   
-  ImageDestroy(&temp); // destroi a imagem temporaria
+  ImageDestroy(&temp); //O(1) destroi a imagem temporaria
 }
   
